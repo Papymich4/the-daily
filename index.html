@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mes habitudes — Suivi personnel</title>
+<meta name="theme-color" content="#0B0F0E"><meta name="description" content="Un espace personnel pour construire et suivre tes habitudes chaque mois."><link rel="manifest" href="manifest.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0F0E;--sf:#1C2420;--sec:#171D1A;--ink:#F5F7F5;--mut:#A1AAA3;--ac:#7ED957;--ac2:#A8E890;--soft:#A8E890;--on:#171D1A;--ln:#303B33;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Outfit,system-ui,sans-serif}
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:14px 16px 40px}
+#bg,#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#bg{z-index:0}#fx{z-index:13}
+@keyframes up{from{opacity:0;transform:translateY(16px)}}
+main>*{animation:up .65s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*70ms)}
+@keyframes glow{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--ac) 28%,transparent)}}
+.strip button.sel{animation:glow 2s ease-in-out infinite}
+.chip{border-color:var(--soft)}
+.mem small{color:var(--ac)}
+h2{font-size:17px;margin:26px 0 10px;font-weight:700}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.nav h1{font-size:24px;margin:0;font-weight:700;text-transform:capitalize}
+.nav button{width:44px;height:44px;border-radius:50%;border:1px solid var(--ln);background:var(--sf);color:var(--ink);font-size:20px}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--ln);border-radius:20px;padding:6px 8px 6px 12px;font-size:14px}
+.chip button{border:0;background:none;color:var(--mut);font-size:18px;line-height:1;padding:0 4px}
+.add{display:flex;gap:8px}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:10px 12px;width:100%}
+.btn{border:0;background:var(--ac);color:var(--on);font:inherit;font-weight:600;border-radius:10px;padding:0 16px;min-height:44px}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}
+.strip button{flex:0 0 40px;height:48px;border-radius:10px;border:1px solid var(--ln);font:inherit;font-size:14px;color:var(--ink);background:color-mix(in srgb,var(--ac) calc(var(--p)*70%),var(--sf))}
+.strip button.sel{outline:2px solid var(--ink);outline-offset:1px}
+.strip button:disabled{opacity:.35}
+.day{font-size:14px;color:var(--mut);margin:4px 0 10px;text-transform:capitalize}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--bg);border:1px solid var(--ln);border-radius:12px;padding:12px;margin-bottom:8px;font:inherit;color:var(--ink);min-height:48px}
+.row i{flex:0 0 24px;height:24px;border-radius:7px;border:2px solid var(--mut);display:grid;place-items:center;font-style:normal;color:var(--on);font-size:15px;font-weight:700}
+.row.on{border-color:var(--ac)}
+.row.on i{background:var(--ac);border-color:var(--ac)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.stat{background:var(--bg);border-radius:10px;padding:10px}
+.stat b{display:block;font-size:22px}
+.stat span{font-size:13px;color:var(--mut)}
+.bar{margin:10px 0 0}
+.bar div:first-child{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+.bar .t{height:8px;border-radius:4px;background:var(--bg)}
+.bar .t i{display:block;height:100%;border-radius:4px;background:var(--ac)}
+.mem{border-bottom:1px solid var(--ln);padding:10px 0;font-size:15px}
+.mem small{display:block;color:var(--mut);font-size:12px;margin-bottom:2px}
+.mem:last-child{border:0}
+.mut{color:var(--mut);font-size:14px}
+svg{width:100%;height:auto;display:block}
+input:focus,textarea:focus{outline:2px solid var(--ac);border-color:var(--ac)}
+.btn,.row,.strip button,.nav button{transition:transform .15s,background .2s,border-color .2s,box-shadow .2s}
+.btn:active,.row:active,.nav button:active,.strip button:active:not(:disabled){transform:scale(.95)}
+.btn{box-shadow:0 4px 14px color-mix(in srgb,var(--ac) 35%,transparent)}
+.row.on{box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 18%,transparent)}
+@keyframes pop{0%{transform:scale(.4)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.row.pop i{animation:pop .35s ease-out}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes grow{from{width:0}}
+.in .ln{stroke-dasharray:1;animation:draw 1.1s ease-out both}
+
+.in .bar .t i{animation:grow .9s ease-out both}
+.in .ar,.in circle.d{animation:fade .8s .5s ease-out both}
+[hidden]{display:none!important}
+main{padding-bottom:110px}
+.pg{animation-delay:0s}
+button.chip{font:inherit;color:var(--ink);padding:6px 12px;border:1px dashed var(--soft);background:var(--bg);border-radius:20px}
+.row:disabled{opacity:.85}
+.warn{font-size:13px;color:var(--mut);margin:10px 0 0}
+select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:10px 12px;width:100%}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;justify-content:center;gap:4px;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--sec) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--ln)}
+.tabs button{flex:1;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:var(--mut);font:inherit;font-size:18px;padding:6px 0;border-radius:12px;min-height:48px;transition:background .2s,color .2s}
+.tabs button span{font-size:11px}
+.tabs button.on{color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,transparent);font-weight:600}
+.modal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(11,17,32,.55)}
+.mbox{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:22px;max-width:420px;width:100%;max-height:85vh;overflow:auto;animation:up .4s both}
+.mbox h2{margin-top:0}
+#onb{position:relative;z-index:1;min-height:100%;display:grid;place-items:center;padding:20px}
+.obox{max-width:440px;width:100%;background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:22px;animation:up .6s both}
+.obox h1{margin:0 0 6px;font-size:26px}
+label{display:block;margin:14px 0 0;font-size:14px;font-weight:600}
+label input,label select{margin-top:6px;font-weight:400}
+.chk{display:flex;gap:10px;font-weight:400;align-items:flex-start}
+.chk input{width:20px;height:20px;margin:2px 0 0;flex:0 0 20px}
+.err{color:#f87171;font-size:14px;min-height:20px}
+.av{display:inline-grid;place-items:center;border-radius:50%;object-fit:cover;flex:0 0 auto}
+.avs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.avb{aspect-ratio:1;border-radius:50%;border:2px solid var(--ln);font-size:26px;transition:transform .15s,border-color .2s}
+.avb.on{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 25%,transparent)}
+.avb:active{transform:scale(.92)}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:12;background:var(--ac);color:var(--on);padding:10px 16px;border-radius:20px;font-weight:600;animation:up .3s both}
+.ghost{background:none;color:var(--ink);border:1px solid var(--ln);box-shadow:none;width:100%;margin-top:10px}
+*{-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--ac)!important;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+select:focus,button:focus,button:focus-visible{outline:none}
+.chk input:focus,.chk input:focus-visible{outline:none!important;box-shadow:none!important}
+body[data-theme="blue"]{--ac:#70B7FF;--ac2:#A8D6FF;--soft:#A8D6FF}
+body[data-theme="violet"]{--ac:#B59AFF;--ac2:#D2C2FF;--soft:#D2C2FF}
+body[data-theme="amber"]{--ac:#E7B85C;--ac2:#F3D38F;--soft:#F3D38F}
+#monthSetup{position:relative;z-index:2;min-height:100dvh;display:grid;place-items:center;padding:22px 16px}
+.setupbox{width:100%;max-width:520px;background:var(--sf);border:1px solid var(--ln);border-radius:20px;padding:22px;animation:up .45s both}
+.setupbox h1{font-size:25px;margin:0 0 6px;text-transform:capitalize}
+.setupbox .sub{color:var(--mut);font-size:14px;line-height:1.5}
+.setupchips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.setupchips .chip{max-width:100%}
+.setupchips .chip span{overflow-wrap:anywhere}
+#setupChips{display:grid;grid-template-columns:1fr;gap:10px}
+.habitsetup{background:var(--bg);border:1px solid var(--ln);border-radius:13px;padding:12px;min-width:0}
+.habitsetup-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:600;margin-bottom:10px}
+.habitsetup-head button{border:0;background:none;color:var(--mut);font-size:21px;padding:0 5px}
+.habitsetup-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.habitsetup-fields label{margin:0;font-size:12px;color:var(--mut);font-weight:500;min-width:0}
+.habitsetup-fields input,.habitsetup-fields select{display:block;margin-top:5px;width:100%;min-width:0;padding:9px 8px;font-size:14px}
+.habitsetup .schedule-note{font-size:11px;color:var(--mut);margin:8px 0 0}
+@media(max-width:360px){.habitsetup-fields{grid-template-columns:1fr}}
+.setupbox .add{margin-top:10px}
+.setupbox .goal{margin-top:16px}
+.setupbox .btn{width:100%;margin-top:16px}
+.heatmap{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:12px 0}
+.heatmap .wd{font-size:11px;color:var(--mut);text-align:center;padding:2px 0}
+.heatday{aspect-ratio:1;border:1px solid var(--ln);border-radius:7px;background:color-mix(in srgb,var(--ac) calc(var(--p)*85%),var(--bg));color:var(--ink);font:inherit;font-size:12px;min-width:0;padding:0}
+.heatday.sel{outline:2px solid var(--ink);outline-offset:1px}
+.heatday:disabled{opacity:.35}
+.progress-card{margin-top:14px}
+.achievements{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.achievement{background:var(--bg);border:1px solid var(--ln);border-radius:11px;padding:10px;font-size:13px;opacity:.48}
+.achievement.unlocked{opacity:1;border-color:var(--ac)}
+.achievement b{display:block;font-size:14px;margin-bottom:3px}
+.pick{display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:12px;text-transform:capitalize;transition:border-color .2s}
+.pick:active{border-color:var(--ac)}
+.sheet{position:fixed;inset:0;z-index:11;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;animation:fade .25s both}
+.sh{width:100%;max-width:520px;margin:0 auto;background:var(--sf);border:1px solid var(--ln);border-radius:22px 22px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));animation:sheet .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes sheet{from{transform:translateY(100%)}}
+.sh i{display:block;width:40px;height:4px;border-radius:2px;background:var(--ln);margin:0 auto 14px}
+.sh button{display:flex;justify-content:space-between;align-items:center;width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:12px;padding:15px 14px;margin-bottom:8px;text-align:left;transition:border-color .2s,transform .15s}
+.sh button:active{transform:scale(.98)}
+.sh button.on{border-color:var(--ac)}
+.sh small{color:var(--ac);font-weight:600}
+.okov{position:fixed;inset:0;z-index:12;display:grid;place-items:center;background:rgba(11,15,14,.75);backdrop-filter:blur(5px);pointer-events:none}
+.okov.out{animation:fadeout .3s both}
+@keyframes fadeout{to{opacity:0}}
+@keyframes zoom{from{transform:scale(.6);opacity:0}}
+@keyframes ping{0%{opacity:.45;transform:scale(.6)}100%{opacity:0;transform:scale(1.9)}}
+.okc{text-align:center}
+.okc svg{width:120px;height:120px;overflow:visible;display:block;margin:0 auto}
+.okc .pu{fill:var(--ac);opacity:0;transform-origin:60px 60px;animation:ping 1s .5s ease-out}
+.okc .rg,.okc .ck{fill:none;stroke:var(--ac);stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.okc .rg{stroke-width:4;animation:draw .6s .1s ease-out forwards}
+.okc .ck{stroke-width:6;animation:draw .4s .55s ease-out forwards}
+.okc h3{margin:14px 0 2px;font-size:22px;animation:up .5s .6s both}
+.okc p{margin:0;color:var(--mut);animation:up .5s .75s both}
+.honest{margin:22px 4px 0;padding:14px;border-radius:14px;border:1px dashed var(--soft);color:var(--mut);font-size:14px;text-align:center}
+.remind{background:color-mix(in srgb,var(--ac) 14%,var(--sf));border:1px solid var(--ac);border-radius:12px;padding:12px;margin:18px 0 -8px;font-size:14px;animation:glow 2s ease-in-out infinite}
+.leg{margin:10px 0 0;font-size:13px;color:var(--mut)}
+.leg div{display:flex;align-items:center;gap:8px;margin-top:5px}
+.leg .dot{width:10px;height:10px;border-radius:50%;background:var(--ac2)}
+.leg .ln2{width:18px;height:4px;border-radius:2px;background:var(--ac)}
+.nst{display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--ln);border-radius:12px;padding:12px;margin-top:12px}
+.nst .ic{flex:0 0 32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:700;color:#0B0F0E}
+.nst.ok .ic{background:#4ade80}.nst.ko .ic{background:#f87171}.nst.neu .ic{background:var(--ln);color:var(--ink)}
+.nst b{display:block;font-size:15px}.nst span{font-size:13px;color:var(--mut)}
+.nline{font-size:13px;color:var(--mut);margin:8px 0 0}
+.nerr{color:#f87171;font-size:14px;margin:10px 0 0}
+details.how{margin-top:12px;background:var(--bg);border:1px solid var(--ln);border-radius:12px;padding:12px;font-size:14px}
+details.how summary{font-weight:600;cursor:pointer;min-height:24px}
+details.how ol{margin:10px 0 0;padding-left:20px;line-height:1.55;color:var(--mut)}
+details.how li{margin-bottom:6px}details.how li b{color:var(--ink)}
+</style></head><body data-theme="green"><canvas id="bg"></canvas><canvas id="fx"></canvas>
+<section id="monthSetup" hidden><div class="setupbox"><h1 id="setupTitle">Prépare ton mois</h1><p class="sub">Avant d’entrer dans ton espace, choisis tes habitudes et, si tu le souhaites, l’heure à laquelle tu veux les faire. Tu peux aussi choisir combien de minutes avant recevoir un rappel. Après validation, elles seront verrouillées jusqu’au mois prochain.</p><div class="setupchips" id="setupChips"></div><div id="setupAdd"><div class="add"><input id="setupInput" maxlength="40" placeholder="Ex. Lire 20 minutes" onkeydown="if(event.key==='Enter')addSetupH()"><button class="btn" onclick="addSetupH()">Ajouter</button></div><div class="setupchips" id="setupSug"></div><p class="warn" id="setupCount">0/8 habitudes</p></div><label class="goal">Mon objectif du mois<input id="monthGoal" maxlength="100" placeholder="Ex. Être plus régulier dans mes études"></label><p class="err" id="setupErr"></p><button class="btn" onclick="validateSetup()">Valider et entrer dans mon espace</button><p class="warn">Tu peux choisir jusqu’à 8 habitudes. Il en faut au moins une pour commencer.</p></div></section>
+<main hidden>
+<div class="nav" id="nav"><button onclick="mv(-1)" aria-label="Mois précédent">‹</button><h1 id="ttl"></h1><button id="nx" onclick="mv(1)" aria-label="Mois suivant">›</button></div>
+<p class="mut" id="hi" style="margin:6px 0 0;text-align:center"></p>
+<section class="pg" id="p-hab"><h2>Mes habitudes du mois</h2>
+<div class="card"><div class="chips" id="chips"></div><p class="mut" id="hcount" style="margin:8px 0 0"></p><p class="warn">🔒 Configuration validée : tes habitudes et ton objectif sont verrouillés pour tout le mois. Tu pourras refaire tes choix le mois prochain.</p></div>
+<div id="goalBanner" class="card" style="margin-top:12px" hidden></div>
+<div id="daysec"></div><div id="progress"></div><p class="honest">💚 Sois honnête avec toi-même : tricher ne trompe que toi. Chaque case cochée sincèrement te construit une meilleure version de toi.</p></section>
+<section class="pg" id="p-cur" hidden><h2>Ma courbe</h2><div class="card" id="chart"></div></section>
+<section class="pg" id="p-mem" hidden><h2>Mon moment marquant</h2>
+<div class="card"><button class="pick" id="nsel" onclick="openSheet()"></button><div id="nbox"></div></div>
+<h2>Tous mes moments</h2><div class="card" id="mems"></div></section>
+<section class="pg" id="p-bil" hidden><h2>Bilan du mois</h2><div class="card" id="bilm"></div><h2>Bilan de l’année</h2><div class="card" id="bil"></div></section>
+<section class="pg" id="p-pro" hidden><h2>Mon nom</h2><div class="card" id="pron"></div><h2>Mon avatar</h2><div class="card" id="proa"></div><h2>Apparence et rappels</h2><div class="card" id="themebox"></div><h2>Installer l’application</h2><div class="card" id="installbox"><p class="mut" style="margin-top:0">Installe Mes habitudes sur ton écran d’accueil pour l’ouvrir comme une application et l’utiliser hors connexion après le premier chargement.</p><button class="btn" style="width:100%" onclick="installApp()">Installer l’application</button><p class="warn" id="installHint">L’installation sera proposée lorsque l’application sera hébergée en HTTPS.</p></div><h2>Mes données</h2><div class="card" id="backup"><p class="mut" style="margin-top:0">Garde une copie de tes habitudes, statistiques et moments marquants. Tu pourras la restaurer sur un autre téléphone.</p><button class="btn" style="width:100%" onclick="exportBackup()">Télécharger ma sauvegarde</button><button class="btn ghost" onclick="document.getElementById('restore-file').click()">Restaurer une sauvegarde</button><input id="restore-file" type="file" accept=".json,application/json" hidden onchange="importBackup(this)"><p class="warn">La restauration remplace les données actuellement enregistrées sur cet appareil. Fais d’abord une sauvegarde si tu veux les conserver.</p></div></section>
+</main>
+<nav class="tabs" id="tabs" hidden>
+<button data-p="hab" onclick="show('hab')">🏠<span>Habitudes</span></button><button data-p="cur" onclick="show('cur')">📈<span>Courbe</span></button><button data-p="mem" onclick="show('mem')">✨<span>Moments</span></button><button data-p="bil" onclick="show('bil')">🏆<span>Bilan</span></button><button data-p="pro" onclick="show('pro')">👤<span>Profil</span></button></nav>
+<section id="onb" hidden><div class="obox"><h1>Bienvenue 👋</h1><p class="mut">Réponds à 4 questions rapides pour personnaliser ton suivi. Ensuite, tu choisiras tes habitudes chaque mois.</p>
+<label>Prénom ou pseudo<input id="o-n" maxlength="24"></label>
+<label>Âge (13 ans minimum)<input id="o-a" type="number" inputmode="numeric" min="13" max="99"></label>
+<label>Ce que tu veux améliorer en priorité<select id="o-f"><option value="">Choisir…</option><option value="sante">Santé et sport</option><option value="etudes">Études et travail</option><option value="creation">Création et projets</option><option value="bienetre">Bien-être et mental</option><option value="finance">Argent et organisation</option></select></label>
+<label>Ton expérience du suivi d’habitudes<select id="o-e"><option value="">Choisir…</option><option>Débutant</option><option>Intermédiaire</option><option>Confirmé</option></select></label>
+<label class="chk"><input type="checkbox" id="o-c"><span>J’accepte que ces réponses servent à personnaliser mon expérience.</span></label>
+<p class="err" id="o-err"></p><button class="btn" style="width:100%" onclick="startApp()">Commencer</button></div></section>
+<div class="toast" id="toast" hidden></div><div class="okov" id="ok" hidden></div><div class="sheet" id="sheet" hidden onclick="closeSheet()"></div><div class="modal" id="modal" hidden><div class="mbox" id="mbox"></div></div>
+<script>
+const today=new Date(),pad=n=>String(n).padStart(2,'0'),LS='habits-v1';
+const ck=()=>today.getFullYear()+'-'+pad(today.getMonth()+1);
+let cur=ck(),selDay=today.getDate(),S={months:{}},dbDoc=null,saveT,drawIn=true,popId=null;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mk=k=>S.months[k]||(S.months[k]={habits:[],checks:{},notes:{}});
+const dim=k=>{const [y,m]=k.split('-').map(Number);return new Date(y,m,0).getDate()};
+const lim=k=>k===ck()?today.getDate():(k<ck()?dim(k):0);
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+clearTimeout(saveT);saveT=setTimeout(async()=>{if(dbDoc){try{await dbDoc.set({json:JSON.stringify(S)})}catch(e){}}},600)}
+function dayP(k,d){const M=mk(k);if(!M.habits.length)return 0;const ids=M.habits.map(h=>h.id);return (M.checks[d]||[]).filter(i=>ids.includes(i)).length/ids.length}
+function series(k){const o=[];for(let d=1;d<=lim(k);d++)o.push({d,p:dayP(k,d)});return o}
+const avg=a=>a.length?a.reduce((s,x)=>s+(x.p??x),0)/a.length:0;
+function prevKey(k){let [y,m]=k.split('-').map(Number);m--;if(!m){m=12;y--}return y+'-'+pad(m)}
+function mv(dir){if(dir>0&&cur>=ck()||dir<0&&cur<=(S.start||ck()))return;let[y,m]=cur.split('-').map(Number);m+=dir;if(m>12){m=1;y++}if(m<1){m=12;y--}cur=y+'-'+pad(m);selDay=cur===ck()?today.getDate():1;drawIn=true;render()}
+function addH(){if(cur!==ck())return;const M=mk(cur);if(M.setupDone)return toast('Tes habitudes sont verrouillées pour ce mois.');const v=$('#hin').value.trim();if(!v||M.habits.length>=8)return;M.habits.push({id:'h'+Math.random().toString(36).slice(2,8),name:v});save();render()}
+function addSetupH(){const M=mk(ck());if(M.setupDone)return toast('La configuration de ce mois est déjà validée.');const v=$('#setupInput').value.trim();if(!v)return;if(M.habits.length>=8)return toast('Tu as atteint la limite de 8 habitudes.');if(M.habits.some(h=>h.name.toLowerCase()===v.toLowerCase()))return toast('Cette habitude existe déjà.');M.habits.push({id:'h'+Math.random().toString(36).slice(2,8),name:v,time:'',remindBefore:10});M.setupStarted=true;$('#setupInput').value='';save();renderSetup()}
+function delH(id){
+  const M=mk(cur),h=M.habits.find(x=>x.id===id);
+  if(cur!==ck()||!h)return;
+  if(M.setupDone)return toast('Tes habitudes sont verrouillées pour ce mois.');
+  const used=Object.values(M.checks||{}).some(a=>Array.isArray(a)&&a.includes(id));
+  if(used)return toast('Cette habitude est verrouillée : elle a déjà été suivie.');
+  if(!confirm('Supprimer l’habitude « '+h.name+' » ? Cette action est définitive.'))return;
+  M.habits=M.habits.filter(x=>x.id!==id);
+  save();render();toast('Habitude supprimée.');
+}
+function renderSetup(){const k=ck(),M=mk(k),[y,m]=k.split('-').map(Number);$('#setupTitle').textContent='Mes habitudes de '+new Date(y,m-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});$('#setupChips').innerHTML=M.habits.map(h=>{const used=Object.values(M.checks||{}).some(a=>Array.isArray(a)&&a.includes(h.id));const tm=h.time||'';const lead=[5,10,15,30].includes(Number(h.remindBefore))?Number(h.remindBefore):10;return `<div class="habitsetup"><div class="habitsetup-head"><span>${used?'🔒':'•'} ${esc(h.name)}</span>${!used?`<button type="button" aria-label="Supprimer ${esc(h.name)}" onclick="delSetupH('${h.id}')">×</button>`:''}</div><div class="habitsetup-fields"><label>Heure prévue<input type="time" value="${tm}" aria-label="Heure prévue pour ${esc(h.name)}" onchange="setHabitTime('${h.id}',this.value)" ${used?'disabled':''}></label><label>Me rappeler<select aria-label="Délai du rappel pour ${esc(h.name)}" onchange="setHabitLead('${h.id}',this.value)" ${!tm||used?'disabled':''}><option value="5" ${lead===5?'selected':''}>5 min avant</option><option value="10" ${lead===10?'selected':''}>10 min avant</option><option value="15" ${lead===15?'selected':''}>15 min avant</option><option value="30" ${lead===30?'selected':''}>30 min avant</option></select></label></div><p class="schedule-note">${tm?'Rappel prévu à '+esc(tm)+' ( '+lead+' min avant )':'Sans heure : aucun rappel pour cette habitude.'}</p></div>`}).join('');$('#setupCount').textContent=M.habits.length+'/8 habitudes';const full=M.habits.length>=8;$('#setupInput').disabled=full;$('#setupInput').placeholder=full?'Limite de 8 habitudes atteinte':'Ex. Lire 20 minutes';$('#setupAdd').querySelector('button').disabled=full;$('#setupSug').hidden=full;$('#setupSug').innerHTML=(SUG[S.profile?.focus]||[]).filter(x=>!M.habits.some(h=>h.name.toLowerCase()===x.toLowerCase())).map(x=>`<button class="chip" onclick="addSuggested('${esc(x).replace(/'/g,'&#39;')}')">+ ${esc(x)}</button>`).join('');$('#monthGoal').value=M.goal||''}
+function setHabitTime(id,value){const M=mk(ck()),h=M.habits.find(x=>x.id===id);if(!h)return;h.time=value||'';if(!h.remindBefore)h.remindBefore=10;save();renderSetup();if($('#habitScheduleProfile'))renderHabitScheduleProfile()}
+function setHabitLead(id,value){const M=mk(ck()),h=M.habits.find(x=>x.id===id);if(!h)return;h.remindBefore=Number(value)||10;save();renderSetup();if($('#habitScheduleProfile'))renderHabitScheduleProfile()}
+function addSuggested(v){const M=mk(ck());if(M.setupDone)return toast('La configuration de ce mois est déjà validée.');if(M.habits.length>=8)return toast('Tu as atteint la limite de 8 habitudes.');if(M.habits.some(h=>h.name.toLowerCase()===v.toLowerCase()))return;M.habits.push({id:'h'+Math.random().toString(36).slice(2,8),name:v,time:'',remindBefore:10});M.setupStarted=true;save();renderSetup()}
+function delSetupH(id){const M=mk(ck()),h=M.habits.find(x=>x.id===id);if(M.setupDone)return toast('La configuration de ce mois est déjà validée.');if(!h)return;const used=Object.values(M.checks||{}).some(a=>Array.isArray(a)&&a.includes(id));if(used)return toast('Cette habitude est verrouillée.');if(!confirm('Supprimer « '+h.name+' » ?'))return;M.habits=M.habits.filter(x=>x.id!==id);save();renderSetup()}
+function validateSetup(){const M=mk(ck()),err=$('#setupErr');if(!M.habits.length){err.textContent='Ajoute au moins une habitude pour continuer.';return}M.goal=$('#monthGoal').value.trim();M.setupDone=true;M.setupStarted=false;forceSetup=false;save();boot()}
+function editMonthSetup(){const M=mk(ck());if(M.setupDone)return toast('Tes habitudes sont verrouillées jusqu’au mois prochain.');M.setupStarted=true;forceSetup=true;save();boot()}
+function tog(id){if(cur!==ck()||selDay!==lim(cur)||(mk(cur).done||{})[selDay])return;const M=mk(cur),a=M.checks[selDay]||(M.checks[selDay]=[]),i=a.indexOf(id);i<0?a.push(id):a.splice(i,1);popId=i<0?id:null;save();render();if(i<0&&dayP(cur,selDay)===1)window.burst&&burst()}
+function validateNote(){if(cur!==ck())return;const M=mk(cur),v=($('#nt')||{}).value;if(!v||!v.trim()||M.notes[nDay])return;M.notes[nDay]=v.trim();save();render();fly('mem','Moment enregistré','Une belle page de plus dans ton mois ✨');setTimeout(()=>window.burst&&burst(),480)}
+function $(s){return document.querySelector(s)}
+function renderMem(){const M=mk(cur),ds=Object.keys(M.notes).filter(d=>M.notes[d].trim()).map(Number).sort((a,b)=>b-a),[y,m]=cur.split('-').map(Number);
+$('#mems').innerHTML=ds.length?ds.map(d=>`<div class="mem"><small>${new Date(y,m-1,d).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</small>${esc(M.notes[d])}</div>`).join(''):'<span class="mut">Écris ton moment marquant du jour : il apparaîtra ici.</span>'}
+function chart(){const k=cur,M=mk(k),s=series(k),n=dim(k);
+if(!M.habits.length||!s.length){return '<span class="mut">Choisis tes habitudes et coche tes jours : ta courbe apparaîtra ici.</span>'}
+const W=340,H=230,l=40,r=12,t=14,b=30,X=d=>l+(d-1)/(n-1)*(W-l-r),Y=p=>t+(1-p)*(H-t-b);
+const ma=s.map((_,i)=>({d:s[i].d,p:avg(s.slice(Math.max(0,i-6),i+1))}));
+const line=ma.map((q,i)=>(i?'L':'M')+X(q.d).toFixed(1)+' '+Y(q.p).toFixed(1)).join(' ');
+const area=line+` L${X(ma[ma.length-1].d)} ${Y(0)} L${X(ma[0].d)} ${Y(0)} Z`;
+let g='';[0,.25,.5,.75,1].forEach(p=>g+=`<line x1="${l}" x2="${W-r}" y1="${Y(p)}" y2="${Y(p)}" stroke="var(--ln)"/><text x="${l-6}" y="${Y(p)+4}" text-anchor="end" font-size="12" fill="var(--mut)">${p*100}%</text>`);
+g+=`<line x1="${l}" x2="${W-r}" y1="${Y(.8)}" y2="${Y(.8)}" stroke="var(--soft)" stroke-dasharray="5 5" stroke-opacity=".8"/><text x="${W-r}" y="${Y(.8)-5}" text-anchor="end" font-size="11" fill="var(--soft)">Objectif 80%</text>`;
+[1,8,15,22,29].filter(d=>d<=n).forEach(d=>g+=`<text x="${X(d)}" y="${H-8}" text-anchor="middle" font-size="12" fill="var(--mut)">${d}</text>`);
+const Z=s[s.length-1],zx=X(Z.d),zy=Y(Z.p),lx=Math.min(Math.max(zx,l+18),W-r-18),ly=zy<t+24?zy+24:zy-13;
+const dots=s.map(q=>`<circle class="d" cx="${X(q.d)}" cy="${Y(q.p)}" r="4.5" fill="var(--ac2)" stroke="var(--bg)" stroke-width="1.5"/>`).join('')+`<circle cx="${zx}" cy="${zy}" r="6" fill="var(--ac)"><animate attributeName="r" values="6;14;6" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;0;.55" dur="2s" repeatCount="indefinite"/></circle><circle cx="${zx}" cy="${zy}" r="6" fill="var(--ac)" stroke="var(--bg)" stroke-width="2"/><text x="${lx}" y="${ly}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">${Math.round(Z.p*100)}%</text>`;
+const mAvg=avg(s),pk=prevKey(k),ps=series(pk),hasP=mk(pk).habits.length&&ps.length;
+let trend='—',tl='Évolution';
+if(s.length>=14){const a=avg(s.slice(0,7)),z=avg(s.slice(-7)),dl=Math.round((z-a)*100);trend=(dl>0?'+':'')+dl+' pts';tl='Dernière vs 1re semaine'}
+else if(hasP){const dl=Math.round((mAvg-avg(ps))*100);trend=(dl>0?'+':'')+dl+' pts';tl='Vs mois précédent'}
+const bars=M.habits.map(h=>{const c=s.filter(q=>(M.checks[q.d]||[]).includes(h.id)).length,p=Math.round(c/s.length*100);return `<div class="bar"><div><span>${esc(h.name)}</span><b>${p}%</b></div><div class="t"><i style="width:${p}%"></i></div></div>`}).join('');
+return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Courbe des habitudes">${g}<path class="ar" d="${area}" fill="var(--ac)" fill-opacity=".18"/><path class="ln" pathLength="1" d="${line}" fill="none" stroke="var(--ac)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg>
+<div class="leg"><div><i class="dot"></i>Points : ton score de chaque jour</div><div><i class="ln2"></i>Ligne : moyenne sur 7 jours</div><div>📈 Plus la ligne monte, mieux tu tiens tes habitudes.</div></div>
+<div class="stats"><div class="stat"><b>${Math.round(mAvg*100)}%</b><span>Moyenne du mois</span></div><div class="stat"><b>${trend}</b><span>${tl}</span></div></div>${bars}`}
+function progressHTML(k){const M=mk(k),L=lim(k);let streak=0,best=0,run=0,completed=0,perfect=0;for(let d=1;d<=L;d++){const p=dayP(k,d);if(p===1){run++;perfect++;}else run=0;best=Math.max(best,run);completed+=(M.checks[d]||[]).filter(id=>M.habits.some(h=>h.id===id)).length}let d=L;if(d===today.getDate()&&dayP(k,d)<1)d--;while(d>=1&&dayP(k,d)===1){streak++;d--}const totalChecks=Object.values(M.checks||{}).reduce((a,x)=>a+(Array.isArray(x)?x.filter(id=>M.habits.some(h=>h.id===id)).length:0),0);const trophies=[['🌱','Premier pas','Valider ta première habitude',totalChecks>=1],['🔥','7 jours parfaits','Enchaîner 7 journées complètes',best>=7],['🏆','30 jours parfaits','Enchaîner 30 journées complètes',best>=30],['💯','100 validations','Cocher 100 habitudes',totalChecks>=100],['✨','5 journées parfaites','Réussir 5 journées complètes',perfect>=5]];return `<div class="card progress-card"><h2 style="margin:0 0 8px">Ma régularité</h2><div class="stats"><div class="stat"><b>🔥 ${streak}</b><span>Jours parfaits d’affilée</span></div><div class="stat"><b>🏅 ${best}</b><span>Meilleure série ce mois</span></div><div class="stat"><b>${totalChecks}</b><span>Habitudes validées</span></div><div class="stat"><b>${perfect}</b><span>Journées parfaites</span></div></div><h2>Trophées</h2><div class="achievements">${trophies.map(t=>`<div class="achievement ${t[3]?'unlocked':''}"><b>${t[0]} ${t[1]}</b><span>${t[2]}</span>${t[3]?'<div style="color:var(--ac);margin-top:5px;font-weight:600">Débloqué ✓</div>':''}</div>`).join('')}</div></div>`}
+function render(){const k=cur,M=mk(k),[y,m]=k.split('-').map(Number),n=dim(k),L=lim(k),ro=k!==ck(),bil=page==='bil';
+if(selDay>L)selDay=Math.max(L,1);
+$('#nav').hidden=page==='pro';$('#hi').hidden=page==='pro';
+$('#ttl').textContent=new Date(y,m-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+const pv=$('#nav').children[0],nx=$('#nx');nx.disabled=k>=ck();pv.disabled=k<=(S.start||ck());nx.style.opacity=nx.disabled?.3:1;pv.style.opacity=pv.disabled?.3:1;
+$('#hi').innerHTML=(S.profile?`<span style="display:inline-flex;align-items:center;gap:8px;cursor:pointer" onclick="show('pro')">${avHTML(28)}Salut ${esc(S.profile.name)} 👋</span>`:'')+(ro?' · mois terminé, lecture seule':'');
+$('#chips').innerHTML=M.habits.map(h=>{const used=Object.values(M.checks||{}).some(a=>Array.isArray(a)&&a.includes(h.id));return `<span class="chip">${used?'🔒':'•'} ${esc(h.name)}${!ro&&!M.setupDone&&!used?`<button type="button" aria-label="Supprimer ${esc(h.name)}" title="Supprimer cette habitude" onclick="delH('${h.id}')">×</button>`:''}</span>`}).join('');
+$('#hcount').textContent=ro?(M.habits.length?M.habits.length+' habitudes ce mois-là':'Aucune habitude ce mois-là'):(M.habits.length?M.habits.length+'/8 habitudes':'Aucune habitude');
+$('#goalBanner').hidden=!M.goal;$('#goalBanner').innerHTML=M.goal?`<span class="mut">🎯 Objectif du mois</span><p style="margin:6px 0 0;font-weight:600">${esc(M.goal)}</p>`:'';
+let h='';const dn=!!(M.done&&M.done[selDay]),rt=(S.profile||{}).reminder||'20:00',nowMin=new Date().getHours()*60+new Date().getMinutes(),rem=!ro&&rt!=='off'&&selDay===L&&!dn&&M.habits.length>0&&nowMin>=rt.split(':').reduce((a,x)=>a*60+Number(x),0);
+if(M.habits.length&&L){h=(rem?`<div class="remind">⏰ Il est ${rt} : pense à valider ta journée !</div>`:'')+'<h2>Calendrier du mois</h2><div class="card"><div class="heatmap">'+['L','M','M','J','V','S','D'].map(x=>`<span class="wd">${x}</span>`).join('')+Array.from({length:new Date(y,m-1,1).getDay()===0?6:new Date(y,m-1,1).getDay()-1},()=>'<span></span>').join('')+Array.from({length:n},(_,i)=>i+1).map(d=>`<button class="heatday ${d===selDay?'sel':''}" style="--p:${dayP(k,d)}" ${d>L?'disabled':''} onclick="selDay=${d};render()">${d}</button>`).join('')+'</div>'
++`<div class="day">${new Date(y,m-1,selDay).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}${!ro&&selDay!==L?' · 🔒 jour passé : consultation seule':''}</div>`
++M.habits.map(x=>{const on=(M.checks[selDay]||[]).includes(x.id);return `<button class="row ${on?'on':''} ${x.id===popId?'pop':''}" ${ro||selDay!==L||dn?'disabled':''} onclick="tog('${x.id}')"><i>${on?'✓':''}</i>${esc(x.name)}</button>`}).join('')+(ro||selDay!==L?'':(dn?'<p class="warn" style="text-align:center">✅ Journée validée : tes cases sont verrouillées.</p>':'<button class="btn" style="width:100%;margin-top:6px" onclick="askDay()">Valider ma journée</button>'))+'</div>'}
+else if(!ro)h='<p class="mut">Ajoute tes habitudes ci-dessus pour commencer à cocher tes jours.</p>';
+$('#daysec').innerHTML=h;
+if(page==='hab')$('#progress').innerHTML=progressHTML(k);
+if(nDay>L||nDay<L-1||nDay<1)nDay=Math.max(L,1);$('#nsel').innerHTML=`<span>${new Date(y,m-1,nDay).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</span><span>▾</span>`;
+const sv=M.notes[nDay];$('#nbox').innerHTML=sv?`<div class="mem" style="margin-top:12px"><small>🔒 Moment validé : il ne peut plus être modifié</small>${esc(sv)}</div>`:(ro||!L?'<p class="mut" style="margin:12px 0 0">Aucun moment enregistré ce jour-là.</p>':'<textarea id="nt" rows="3" maxlength="300" style="margin-top:12px" placeholder="Un seul moment dont tu es fier aujourd’hui…"></textarea><p class="warn">🔒 Un seul moment par jour. Une fois validé, il ne peut plus être modifié.</p><button class="btn" style="width:100%;margin-top:6px" onclick="validateNote()">Valider mon moment</button>');
+if(page==='cur'){$('#chart').className='card'+(drawIn?' in':'');drawIn=false;$('#chart').innerHTML=chart()}
+if(bil){renderBilM();renderBil()}if(page==='pro')renderPro();
+renderMem();popId=null}
+let showB=null,tt=0,okT=0,nDay=today.getDate();
+function openSheet(){const L=lim(cur),[y,m]=cur.split('-').map(Number),f=d=>new Date(y,m-1,d).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}),sh=$('#sheet');
+sh.innerHTML=`<div class="sh" onclick="event.stopPropagation()"><i></i>${[L,L-1].filter(d=>d>=1).map((d,i)=>`<button class="${d===nDay?'on':''}" onclick="pickDay(${d})"><span style="text-transform:capitalize">${f(d)}</span><small>${cur===ck()?(i?'Hier':'Aujourd’hui'):''}</small></button>`).join('')}</div>`;sh.hidden=false}
+function closeSheet(){$('#sheet').hidden=true}
+function pickDay(d){nDay=d;closeSheet();render()}
+function askDay(){const M=mk(cur);if(cur!==ck()||(M.done&&M.done[selDay]))return;const left=M.habits.length-(M.checks[selDay]||[]).filter(i=>M.habits.some(h=>h.id===i)).length;
+$('#mbox').innerHTML=`<h2>Valider ma journée ?</h2><p>${left?`Il te reste ${left} habitude${left>1?'s':''} non cochée${left>1?'s':''}. `:'Toutes tes habitudes sont cochées 🎉 '}Une fois validée, tu ne pourras plus modifier les cases d’aujourd’hui.</p><button class="btn" style="width:100%" onclick="doDay()">Oui, je valide</button><button class="btn ghost" onclick="$('#modal').hidden=true">Pas encore</button>`;$('#modal').hidden=false}
+function doDay(){const M=mk(cur);(M.done||(M.done={}))[selDay]=true;save();$('#modal').hidden=true;render();fly('hab','Journée validée','Bravo, à demain ! 💚');setTimeout(()=>window.burst&&burst(),480)}
+function fly(p,title,sub,hold){const t=document.querySelector('#tabs button[data-p="'+p+'"]'),o=$('#ok');if(!t)return;clearTimeout(okT);
+o.className='okov';o.innerHTML=`<div class="okc" id="okc"><svg viewBox="0 0 120 120"><circle class="pu" cx="60" cy="60" r="50"/><circle class="rg" cx="60" cy="60" r="50" pathLength="1" transform="rotate(-90 60 60)"/><path class="ck" d="M37 61 L53 77 L83 43" pathLength="1"/></svg><h3>${title}</h3><p>${sub}</p></div>`;o.hidden=false;
+const c=$('#okc'),r=c.getBoundingClientRect(),b=t.getBoundingClientRect(),dx=b.left+b.width/2-(r.left+r.width/2),dy=b.top+b.height/2-(r.top+r.height/2),from={transform:`translate(${dx}px,${dy}px) scale(.05)`,opacity:0},pulse=()=>t.animate([{transform:'scale(1)'},{transform:'scale(1.35)'},{transform:'scale(1)'}],{duration:420,easing:'ease-out'});
+o.animate([{opacity:0},{opacity:1}],{duration:300,fill:'both'});pulse();
+c.animate([from,{transform:'none',opacity:1}],{duration:560,easing:'cubic-bezier(.2,.9,.3,1.12)',fill:'both'});
+okT=setTimeout(()=>{c.animate([{transform:'none',opacity:1},from],{duration:460,easing:'cubic-bezier(.6,0,.8,.3)',fill:'both'});o.animate([{opacity:1},{opacity:0}],{duration:460,fill:'both'});okT=setTimeout(()=>{o.hidden=true;pulse()},450)},hold||2000)}
+function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,2200)}
+const AVS=[['🦊','#2A3F22'],['🐼','#1F3A33'],['🐸','#2E4A1F'],['🦁','#4A3A1A'],['🐙','#3A2A44'],['🦉','#2A3340'],['🐢','#1F4030'],['🐯','#4A2E1A'],['🦄','#40284A'],['🐲','#1F4A2A'],['🦋','#1F3A4A'],['🐺','#2A2F36'],['🐧','#1F3340'],['🦖','#2F4A1F'],['🐨','#2E3A33']];
+function avHTML(z){const a=AVS[(S.profile||{}).avatar??0];return `<span class="av" style="width:${z}px;height:${z}px;font-size:${z*.55}px;background:${a[1]}">${a[0]}</span>`}
+function renderPro(){const p=S.profile;if(!$('#pn'))$('#pron').innerHTML=`<label style="margin-top:0">Prénom ou pseudo<input id="pn" maxlength="24" value="${esc(p.name)}"></label><button class="btn" style="width:100%;margin-top:10px" onclick="saveName()">Enregistrer le nom</button>`;
+$('#themebox').innerHTML=`<label style="margin-top:0">Couleur de l’application<select onchange="setTheme(this.value)"><option value="green" ${(p.theme||'green')==='green'?'selected':''}>Vert naturel</option><option value="blue" ${p.theme==='blue'?'selected':''}>Bleu</option><option value="violet" ${p.theme==='violet'?'selected':''}>Violet</option><option value="amber" ${p.theme==='amber'?'selected':''}>Ambre</option></select></label><label>Rappel quotidien<select onchange="setReminder(this.value)"><option value="off" ${p.reminder==='off'?'selected':''}>Désactivé</option>${['18:00','19:00','20:00','21:00','22:00'].map(t=>`<option value="${t}" ${(p.reminder||'20:00')===t?'selected':''}>${t}</option>`).join('')}</select></label><h2 style="margin-top:22px">Notifications</h2><div id="notifPanel"></div><div id="habitScheduleProfile"></div>`;
+renderHabitScheduleProfile();
+renderNotifPanel();
+$('#proa').innerHTML=`<div style="text-align:center;margin-bottom:14px">${avHTML(88)}</div><div class="avs">${AVS.map((a,i)=>`<button class="avb ${(p.avatar??0)===i?'on':''}" style="background:${a[1]}" onclick="setAv(${i})">${a[0]}</button>`).join('')}</div>`}
+function renderHabitScheduleProfile(){const root=$('#habitScheduleProfile');if(!root)return;const M=mk(ck());root.innerHTML='<h2 style="margin-top:22px">Horaires de mes habitudes</h2><p class="warn">Tu peux modifier les heures et les rappels ici, même après avoir verrouillé tes habitudes du mois. Cela ne change pas ta liste.</p>'+ (M.habits.length?M.habits.map(h=>{const tm=h.time||'',lead=[5,10,15,30].includes(Number(h.remindBefore))?Number(h.remindBefore):10;return `<div class="habitsetup" style="margin-top:9px"><div class="habitsetup-head"><span>${esc(h.name)}</span></div><div class="habitsetup-fields"><label>Heure prévue<input type="time" value="${tm}" aria-label="Heure prévue pour ${esc(h.name)}" onchange="setHabitTime('${h.id}',this.value)"></label><label>Me rappeler<select aria-label="Délai du rappel pour ${esc(h.name)}" onchange="setHabitLead('${h.id}',this.value)" ${!tm?'disabled':''}><option value="5" ${lead===5?'selected':''}>5 min avant</option><option value="10" ${lead===10?'selected':''}>10 min avant</option><option value="15" ${lead===15?'selected':''}>15 min avant</option><option value="30" ${lead===30?'selected':''}>30 min avant</option></select></label></div><p class="schedule-note">${tm?'Rappel à '+esc(tm)+' ('+lead+' min avant)':'Aucun rappel programmé'}</p></div>`}).join(''):'<p class="mut">Aucune habitude configurée pour ce mois.</p>')}
+function setTheme(v){S.profile.theme=v;document.body.dataset.theme=v;save();fly('pro','Thème mis à jour','Ta nouvelle couleur est appliquée à toute l’application 🎨',1500)}
+function setReminder(v){S.profile.reminder=v;save();remDay='';toast(v==='off'?'Rappel désactivé.':'Rappel réglé à '+v+'.')}
+/* ===== Notifications : service worker + autorisation + test ===== */
+let swReg=null,swState='none',howOpen=false;
+function swSupported(){return 'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')}
+const swReady=(()=>{if(!swSupported())return Promise.resolve(null);return navigator.serviceWorker.register('./sw.js').then(()=>navigator.serviceWorker.ready).then(r=>{swReg=r;swState='ok';return r}).catch(()=>{swState='error';return null})})();
+swReady.then(()=>renderNotifPanel());
+try{navigator.permissions&&navigator.permissions.query({name:'notifications'}).then(p=>{p.onchange=()=>renderNotifPanel()}).catch(()=>{})}catch(e){}
+function notifEnv(){
+  if(!('Notification' in window))return 'Ce navigateur ne gère pas les notifications. Utilise Chrome sur Android.';
+  if(!('serviceWorker' in navigator))return 'Ce navigateur ne gère pas les service workers, nécessaires aux notifications sur Android.';
+  if(location.protocol==='file:')return 'L’application est ouverte comme un simple fichier. Héberge-la en HTTPS (ou ouvre-la via localhost) pour activer les notifications.';
+  if(!window.isSecureContext||!swSupported())return 'Les notifications exigent une connexion HTTPS (ou localhost). Cette adresse n’est pas sécurisée.';
+  return '';
+}
+const notifReady=()=>'Notification' in window&&Notification.permission==='granted';
+async function notify(title,body,tag){
+  if(!notifReady())return false;
+  try{const reg=swReg||await swReady;if(reg&&reg.showNotification){await reg.showNotification(title,{body,tag,icon:'icon-192.png',badge:'icon-192.png',vibrate:[120,60,120],data:{url:'./'}});return true}}catch(e){}
+  try{new Notification(title,{body,tag});return true}catch(e){return false}
+}
+function renderNotifPanel(){
+  const el=$('#notifPanel');if(!el)return;
+  const pb=notifEnv(),perm='Notification' in window?Notification.permission:'unsupported';
+  let cls='neu',ic='•',t='Autorisation non demandée',s='Appuie sur « Autoriser les notifications ».';
+  if(perm==='granted'){cls='ok';ic='✓';t='Notifications autorisées';s='Le navigateur autorise les notifications pour cette application.'}
+  else if(perm==='denied'){cls='ko';ic='✕';t='Notifications refusées';s='Débloque-les dans les réglages en suivant les étapes ci-dessous.'}
+  else if(perm==='unsupported'){cls='neu';ic='!';t='Non pris en charge';s='Ce navigateur ne propose pas les notifications.'}
+  const sw=pb?'':(swState==='ok'?'Service worker : actif.':swState==='error'?'Service worker : échec de l’enregistrement (le fichier sw.js est-il bien hébergé à côté de index.html ?).':'Service worker : initialisation…');
+  let btn='';
+  if(perm==='default'&&!pb)btn='<button class="btn" style="width:100%;margin-top:12px" onclick="enableNotifications()">Autoriser les notifications</button>';
+  if(perm==='granted')btn='<button class="btn" style="width:100%;margin-top:12px" onclick="testNotif()">Envoyer une notification de test</button>';
+  if(perm==='denied')btn='<button class="btn ghost" onclick="renderNotifPanel();toast(Notification.permission===\'granted\'?\'Autorisation détectée.\':\'Toujours refusée : suis les étapes ci-dessous.\')">J’ai modifié les réglages : revérifier</button>';
+  el.innerHTML=`<div class="nst ${cls}"><div class="ic">${ic}</div><div><b>${t}</b><span>${s}</span></div></div>${pb?`<p class="nerr">⚠️ ${esc(pb)}</p>`:''}${sw?`<p class="nline">${sw}</p>`:''}${btn}
+<details class="how" ${howOpen?'open':''} ontoggle="howOpen=this.open"><summary>Comment activer les notifications sur Android</summary><ol>
+<li>Ouvre l’application dans <b>Chrome</b> via son adresse <b>HTTPS</b>, puis menu <b>⋮ → Installer l’application</b> (ou « Ajouter à l’écran d’accueil »).</li>
+<li>Reviens ici et appuie sur <b>Autoriser les notifications</b>, puis sur <b>Autoriser</b> dans la fenêtre Android.</li>
+<li>Si c’est refusé : Chrome → <b>⋮ → Paramètres → Paramètres des sites → Notifications</b>, trouve le site et choisis <b>Autoriser</b>. Si l’app est installée : appui long sur son icône → <b>Infos sur l’appli → Notifications</b>.</li>
+<li>Réglages Android → <b>Applications → Chrome</b> (et « Mes habitudes » si installée) → <b>Notifications</b> : tout doit être activé.</li>
+<li>Désactive le mode <b>Ne pas déranger</b> et mets la batterie de Chrome sur <b>Sans restriction</b> (Réglages → Applications → Chrome → Batterie).</li>
+<li>Appuie sur <b>Envoyer une notification de test</b>. Si rien n’apparaît, revérifie les étapes 3, 4 et 5.</li></ol></details>
+<p class="warn">Limite actuelle : les rappels sont déclenchés par l’application elle-même. Ils fonctionnent quand elle est ouverte ou encore active en arrière-plan. Lorsqu’elle est complètement fermée, Android peut les retarder ou les bloquer : aucun serveur de notifications push n’est configuré pour le moment, donc la réception application fermée n’est pas garantie.</p>`;
+}
+async function enableNotifications(){
+  const pb=notifEnv();if(pb){toast(pb);renderNotifPanel();return}
+  if(Notification.permission==='denied'){toast('Autorisation refusée : suis les étapes d’activation.');renderNotifPanel();return}
+  try{await Notification.requestPermission()}catch(e){toast('Impossible de demander l’autorisation sur cet appareil.')}
+  renderNotifPanel();
+  if(Notification.permission==='granted')fly('pro','Notifications autorisées','Envoie maintenant une notification de test pour vérifier.',1600);
+  else if(Notification.permission==='denied')toast('Autorisation refusée : suis les étapes d’activation.');
+  else toast('Autorisation non accordée (fenêtre fermée sans réponse).');
+}
+async function testNotif(){
+  const pb=notifEnv();if(pb){toast(pb);return}
+  if(Notification.permission!=='granted'){toast('Autorise d’abord les notifications.');renderNotifPanel();return}
+  const ok=await notify('Mes habitudes','Notification de test : si tu lis ceci, ça marche ✅','test-'+Date.now());
+  toast(ok?'Notification envoyée au système. Regarde ta barre de notifications.':'Échec de l’envoi. Vérifie les réglages Android indiqués.');
+}
+let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;const h=$('#installHint');if(h)h.textContent='Ton application peut être installée sur cet appareil.'});window.addEventListener('appinstalled',()=>{installPrompt=null;const h=$('#installHint');if(h)h.textContent='Application installée avec succès.'});async function installApp(){if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;return}const h=$('#installHint');if(h)h.textContent='Sur Chrome Android : menu ⋮ puis « Installer l’application » ou « Ajouter à l’écran d’accueil ». Il faut d’abord héberger le dossier sur un site HTTPS.'}
+function saveName(){const v=$('#pn').value.trim();if(!v)return toast('Le nom ne peut pas être vide');S.profile.name=v.slice(0,24);save();render();fly('pro','Nom mis à jour','Salut '+esc(S.profile.name)+' 👋')}
+function setAv(i){S.profile.avatar=i;S.profile.photo=null;save();render();fly('pro','Avatar mis à jour','Il te va bien 😎',1400)}
+const canAsk=k=>k<ck()||(k===ck()&&today.getDate()===dim(k));
+function bilanM(k){const M=mk(k),s=series(k);if(!M.habits.length||!s.length)return '<p class="mut">Aucune donnée pour ce mois.</p>';
+const pc=Math.round(avg(s)*100),R=M.habits.map(h=>({h,p:s.filter(q=>(M.checks[q.d]||[]).includes(h.id)).length/s.length})).sort((a,b)=>b.p-a.p);
+const msg=pc>=80?`🎉 Bravo ! ${pc}% : tu as très bien respecté tes habitudes ce mois-ci. Continue comme ça !`:pc>=50?`👏 Bon mois : ${pc}% de réussite. Tu es sur la bonne voie, encore un petit effort le mois prochain.`:`💪 ${pc}% ce mois-ci : ce n’est pas grave. Chaque jour compte. Repars avec des objectifs simples et monte d’un cran.`;
+const hl=R.length>1?`<p class="mut">Point fort : <b>${esc(R[0].h.name)}</b> (${Math.round(R[0].p*100)}%). À renforcer : <b>${esc(R[R.length-1].h.name)}</b> (${Math.round(R[R.length-1].p*100)}%).</p>`:'';
+return `<p style="margin-top:0;font-size:17px"><b>${msg}</b></p>${hl}${chart()}`}
+function renderBilM(){const k=cur,[y,m]=k.split('-').map(Number),el=$('#bilm'),nm=new Date(y,m-1,1).toLocaleDateString('fr-FR',{month:'long'});
+el.className='card';
+if(!mk(k).habits.length){el.innerHTML='<p class="mut" style="margin:0">Aucune habitude ce mois-là.</p>';return}
+if(!canAsk(k)){el.innerHTML=`<p style="margin:0">🔒 Le bilan de ${nm} sera disponible à la fin du mois, le ${dim(k)} ${nm}.</p>`;return}
+if(showB!==k){el.innerHTML=`<p style="margin-top:0">Ton mois de ${nm} est terminé. Découvre ton bilan.</p><button class="btn" style="width:100%" onclick="showB=cur;drawIn=true;render();fly('bil','Bilan prêt','Voici ton mois en un coup d’œil',1500)">Demander mon bilan</button>`;return}
+el.className='card'+(drawIn?' in':'');drawIn=false;el.innerHTML=bilanM(k)}
+let page='hab',q=[],forceSetup=false;
+const SUG={sante:['30 min de sport','Boire 2 L d’eau','Dormir avant minuit'],etudes:['2 h d’étude','Zéro réseaux en travaillant','Lire 20 pages'],creation:['2 h de montage','Écrire 30 minutes','Publier un contenu'],bienetre:['10 min de méditation','Marcher dehors','Pas d’écran avant de dormir'],finance:['Noter mes dépenses','Pas de repas dehors','Ranger 15 minutes']};
+function bilanYear(){const cy=+ck().slice(0,4),ys=Object.keys(S.months).filter(k=>S.months[k].habits.length).map(k=>+k.slice(0,4)).filter(y=>y<cy);return ys.length?Math.max(...ys):null}
+function renderBil(){const Y=bilanYear();$('#bil').innerHTML=Y?`<p style="margin-top:0"><b>Bilan ${Y}</b>, généré automatiquement par l’application.</p>`+bilanHTML(Y):`<p style="margin:0">🔒 Ton bilan ${ck().slice(0,4)} sera généré automatiquement par l’application à la fin de l’année. Continue de cocher tes habitudes, on s’occupe du reste.</p>`}
+function bilanHTML(Y){const R=[],H={};let perf=0,mems=0;
+for(let m=1;m<=12;m++){const k=Y+'-'+pad(m),M=S.months[k];if(!M||!M.habits.length)continue;const n=dim(k);let sum=0;
+for(let d=1;d<=n;d++){const p=dayP(k,d);sum+=p;if(p===1)perf++;if((M.notes[d]||'').trim())mems++}
+M.habits.forEach(h=>{let c=0;for(let d=1;d<=n;d++)if((M.checks[d]||[]).includes(h.id))c++;const o=H[h.name]||(H[h.name]={c:0,n:0});o.c+=c;o.n+=n});R.push({m,p:sum/n,n})}
+if(!R.length)return '<p class="mut">Pas assez de données.</p>';
+const mn=['Janv.','Févr.','Mars','Avr.','Mai','Juin','Juil.','Août','Sept.','Oct.','Nov.','Déc.'],best=R.reduce((a,b)=>b.p>a.p?b:a),first=R[0],last=R[R.length-1],dl=Math.round((last.p-first.p)*100),top=Object.entries(H).sort((a,b)=>b[1].c/b[1].n-a[1].c/a[1].n)[0];
+const bars=Array.from({length:12},(_,i)=>{const r=R.find(x=>x.m===i+1),x=14+i*27,h=r?Math.max(r.p*100,2):0;return `<rect x="${x}" y="${110-h}" width="18" height="${h}" rx="4" fill="var(--ac)" fill-opacity="${r===best?1:.55}"/><text x="${x+9}" y="128" text-anchor="middle" font-size="9" fill="var(--mut)">${mn[i][0]}</text>`}).join('');
+const msg=R.length>1?(dl>=0?`Bravo : +${dl} pts entre ${mn[first.m-1]} et ${mn[last.m-1]}.`:`${dl} pts entre ${mn[first.m-1]} et ${mn[last.m-1]} : une belle base pour rebondir.`):'';
+const totalDays=R.reduce((a,r)=>a+r.n,0),weighted=R.reduce((a,r)=>a+r.p*r.n,0)/totalDays;return `<svg viewBox="0 0 340 135">${bars}</svg><div class="stats"><div class="stat"><b>${Math.round(weighted*100)}%</b><span>Moyenne ${Y}</span></div><div class="stat"><b>${mn[best.m-1]}</b><span>Meilleur mois (${Math.round(best.p*100)}%)</span></div><div class="stat"><b>${perf}</b><span>Journées parfaites</span></div><div class="stat"><b>${mems}</b><span>Moments marquants</span></div></div><p>${msg} Habitude la plus solide : <b>${esc(top[0])}</b> (${Math.round(top[1].c/top[1].n*100)}%).</p>`}
+function exportBackup(){
+  try{
+    const payload={app:'Mes habitudes',version:1,exportedAt:new Date().toISOString(),data:S};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='mes-habitudes-sauvegarde-'+ck()+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast('Sauvegarde téléchargée.');
+  }catch(e){toast('Impossible de créer la sauvegarde.')}
+}
+function importBackup(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const raw=JSON.parse(reader.result),data=raw&&raw.data?raw.data:raw;
+      if(!data||typeof data!=='object'||!data.months||typeof data.months!=='object')
+        throw new Error('format');
+      for(const [k,m] of Object.entries(data.months)){
+        if(!/^\\d{4}-\\d{2}$/.test(k)||!m||!Array.isArray(m.habits)||typeof m.checks!=='object')
+          throw new Error('structure');
+      }
+      if(!confirm('Restaurer cette sauvegarde ? Les données actuelles seront remplacées.')){input.value='';return}
+      S=data;save();cur=ck();selDay=today.getDate();boot();toast('Sauvegarde restaurée.');
+    }catch(e){alert('Fichier invalide ou sauvegarde incompatible. Aucune donnée n’a été modifiée.')}
+    input.value='';
+  };
+  reader.onerror=()=>{alert('Impossible de lire ce fichier.');input.value=''};
+  reader.readAsText(file);
+}
+function show(p){page=p;if(p==='cur')drawIn=true;document.querySelectorAll('.pg').forEach(e=>e.hidden=e.id!=='p-'+p);document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));scrollTo(0,0);render()}
+function nextM(){const t=q.shift();if(!t){$('#modal').hidden=true;return}$('#mbox').innerHTML=t+'<button class="btn" style="width:100%;margin-top:16px" onclick="nextM()">Continuer</button>';$('#modal').hidden=false;setTimeout(()=>window.burst&&burst(),350)}
+function checkNew(){const k=ck();if(S.lastSeen&&S.lastSeen<k){q.push('<h2>🎉 Félicitations !</h2><p>Félicitations pour le mois achevé, bienvenue dans ce nouveau mois plein d’aventures !</p>');const Y=bilanYear();S.bilanShown=S.bilanShown||{};if(Y&&!S.bilanShown[Y]){S.bilanShown[Y]=1;q.push('<h2>Ton bilan '+Y+'</h2>'+bilanHTML(Y))}}S.lastSeen=k;save();if(q.length&&$('#modal').hidden)nextM()}
+function boot(){const ok=!!(S.profile&&S.profile.name);$('#onb').hidden=ok;const M=mk(ck());if(ok&&M.habits.length&&!M.setupDone&&!M.setupStarted&&!forceSetup)M.setupDone=true;const needsSetup=ok&&(!M.setupDone||forceSetup);$('main').hidden=!ok||needsSetup;$('#tabs').hidden=!ok||needsSetup;$('#monthSetup').hidden=!needsSetup;if(needsSetup){renderSetup();return}if(ok){document.body.dataset.theme=S.profile.theme||'green';checkNew();show(page)}}
+function startApp(){const n=$('#o-n').value.trim(),a=+$('#o-a').value,f=$('#o-f').value,e=$('#o-e').value,er=$('#o-err');
+if(!n)return er.textContent='Indique ton prénom ou un pseudo.';
+if(!(a>=13&&a<=99))return er.textContent='Indique ton âge (13 ans minimum).';
+if(!f||!e)return er.textContent='Choisis une option dans chaque liste.';
+if(!$('#o-c').checked)return er.textContent='Coche la case pour continuer.';
+const ks=Object.keys(S.months).filter(k=>S.months[k].habits.length).sort();
+S.profile={name:n,age:a,focus:f,level:e,theme:'green',reminder:'20:00'};S.start=ks[0]||ck();S.lastSeen=ck();save();boot()}
+try{const r=localStorage.getItem(LS);if(r)S=JSON.parse(r)}catch(e){}
+if(!S.months)S={months:{}};
+boot();
+function checkHabitReminders(){if(!S.profile)return;const now=new Date(),M=mk(ck()),day=now.getDate(),dateKey=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(day);if(!M.habits.length||(M.done||{})[day])return;M.remindersSent=M.remindersSent||{};let changed=false;for(const h of M.habits){if(!h.time||!/^([01]\d|2[0-3]):[0-5]\d$/.test(h.time)||(M.checks[day]||[]).includes(h.id))continue;const [hh,mm]=h.time.split(':').map(Number),lead=[5,10,15,30].includes(Number(h.remindBefore))?Number(h.remindBefore):10,target=new Date(now.getFullYear(),now.getMonth(),day,hh,mm,0,0),due=target.getTime()-lead*60000,key=dateKey+'_'+h.id;if(now.getTime()<due||now.getTime()>=target.getTime()||M.remindersSent[key])continue;M.remindersSent[key]=1;changed=true;const left=Math.max(0,Math.round((target.getTime()-now.getTime())/60000)),body=left>0?'Dans '+left+' min : '+h.name+' ('+h.time+').':'C’est l’heure : '+h.name+' ('+h.time+').';if(notifReady()){notify('Mes habitudes',body,'habit-'+key).then(ok=>{if(!ok)toast('⏰ '+body)})}else{toast('⏰ '+body)}}if(changed)save()}
+setInterval(checkHabitReminders,15000);checkHabitReminders();
+let remDay='';setInterval(()=>{const d=new Date(),M=mk(ck()),r=(S.profile||{}).reminder||'20:00';if(r==='off'||d.getHours()*60+d.getMinutes()<r.split(':').reduce((a,x)=>a*60+Number(x),0)||remDay===d.toDateString()||!S.profile||!M.habits.length||(M.done||{})[d.getDate()])return;remDay=d.toDateString();toast('⏰ Pense à suivre tes habitudes du jour.');if(notifReady()&&document.hidden)notify('Mes habitudes','Pense à suivre tes habitudes du jour.','daily-'+d.toDateString());render()},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkHabitReminders();renderNotifPanel()}});addEventListener('focus',()=>renderNotifPanel());
+(function(){
+const cv=document.getElementById('bg'),fx=document.getElementById('fx'),g=cv.getContext('2d'),f=fx.getContext('2d');
+let W=0,H=0,col=[126,217,87],GS=34,rip=[],ptr={x:-999,y:-999,a:0},parts=[],lastR=0,lastT=-9;
+let soft=[168,232,144];const deep=[245,247,245];
+const rgb=h=>{h=h.trim().replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]};
+function size(){const d=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=innerHeight;[cv,fx].forEach(k=>{k.width=W*d;k.height=H*d});g.setTransform(d,0,0,d,0,0);f.setTransform(d,0,0,d,0,0)}
+const aim=(x,y)=>{ptr.x=x;ptr.y=y;ptr.a=1};
+addEventListener('pointermove',e=>aim(e.clientX,e.clientY),{passive:true});
+addEventListener('touchmove',e=>{const t=e.touches[0];if(t)aim(t.clientX,t.clientY)},{passive:true});
+addEventListener('pointerdown',e=>{aim(e.clientX,e.clientY);rip.push({x:e.clientX,y:e.clientY,t:performance.now()/1000})},{passive:true});
+addEventListener('resize',size);
+window.burst=function(){const el=document.querySelector('.row.pop'),b=el?el.getBoundingClientRect():{left:W/2,top:H/2,width:0,height:0},x=b.left+b.width/2,y=b.top+b.height/2;
+for(let i=0;i<50;i++){const a=Math.random()*6.28,s=3+Math.random()*7;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-4,w:4+Math.random()*4,life:1,rot:Math.random()*6,c:[col,soft,deep][i%3]})}};
+function frame(ts){const t=ts/1000;
+if(t-lastT>2){lastT=t;try{col=rgb(getComputedStyle(document.body).getPropertyValue('--ac'));soft=rgb(getComputedStyle(document.body).getPropertyValue('--ac2'))}catch(e){}}
+g.clearRect(0,0,W,H);f.clearRect(0,0,W,H);
+ptr.a*=.96;if(ptr.a<.02)ptr.a=0;
+const O=[[.15,.18,240,.31],[.85,.45,270,.23],[.3,.85,250,.27]].map((o,i)=>({x:W*(o[0]+.14*Math.sin(t*o[3]+i*2.1)),y:H*(o[1]+.12*Math.cos(t*o[3]*1.2+i)),r:o[2]}));
+if(t-lastR>9){lastR=t;const o=O[Math.floor(t)%3];rip.push({x:o.x,y:o.y,t})}
+rip=rip.filter(r=>t-r.t<2);
+O.forEach(o=>{const k=g.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);k.addColorStop(0,`rgba(${col},.09)`);k.addColorStop(1,`rgba(${col},0)`);g.fillStyle=k;g.fillRect(o.x-o.r,o.y-o.r,o.r*2,o.r*2)});
+const cols=Math.ceil(W/GS)+2,rows=Math.ceil(H/GS)+2,P=new Array(cols*rows),ox=(t*3)%GS-GS,oy=(t*2)%GS-GS;
+for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const bx=c*GS+ox,by=r*GS+oy;let l=0,dx=0,dy=Math.sin(t*1.1+bx*.018+by*.012)*1.2;
+for(const o of O){const d=Math.hypot(bx-o.x,by-o.y);if(d<o.r)l+=(1-d/o.r)*.3}
+if(ptr.a){const d=Math.hypot(bx-ptr.x,by-ptr.y);if(d<140&&d>0){const k=(1-d/140)*ptr.a;dx+=(bx-ptr.x)/d*k*8;dy+=(by-ptr.y)/d*k*8;l+=k*.5}}
+for(const q of rip){const age=t-q.t,d=Math.hypot(bx-q.x,by-q.y),w=Math.abs(d-age*300);if(w<55&&d>0){const k=(1-w/55)*Math.max(0,1-age/1.8);dx+=(bx-q.x)/d*k*6;dy+=(by-q.y)/d*k*6;l+=k*.45}}
+P[r*cols+c]={x:bx+dx,y:by+dy,l:Math.min(l,1.2)}}
+g.lineWidth=1;
+const seg=(a,b)=>{g.strokeStyle=`rgba(${col},${.07+(a.l+b.l)/2*.22})`;g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke()};
+for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const a=P[r*cols+c];if(c<cols-1)seg(a,P[r*cols+c+1]);if(r<rows-1)seg(a,P[(r+1)*cols+c]);
+g.fillStyle=`rgba(${col},${.12+a.l*.35})`;g.beginPath();g.arc(a.x,a.y,1.2+a.l*1.2,0,6.28);g.fill()}
+parts=parts.filter(p=>p.life>0);
+for(const p of parts){p.vy+=.28;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.life-=.013;p.rot+=.15;f.save();f.translate(p.x,p.y);f.rotate(p.rot);f.fillStyle=`rgba(${p.c},${Math.max(p.life,0)})`;f.fillRect(-p.w/2,-p.w/4,p.w,p.w/2);f.restore()}
+requestAnimationFrame(frame)}
+size();document.querySelectorAll('main>*').forEach((e,i)=>e.style.setProperty('--i',i));requestAnimationFrame(frame);
+})();
+</script></body></html>
